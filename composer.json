@@ -1,0 +1,15 @@
+{
+    "name": "nandeesh/codang",
+    "description": "backend",
+    "require": {
+        "league/oauth2-client": "^2.6",
+        "slim/slim": "^4.6",
+        "slim/psr7": "^1.2"
+    },
+    "authors": [
+        {
+            "name": "NandeeshG",
+            "email": "nandeeshgupta@gmail.com"
+        }
+    ]
+}
