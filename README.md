@@ -15,11 +15,11 @@ An app to practice problems. Using codechef API
 
 ## Plan :
 
--   [ ] Understand API
--   [ ] Plan Functions
--   [ ] Make Relations
--   [ ] 10 Iterations for above two
--   [ ] Reconfirm and Normalise DBMS
+-   [x] Understand API
+-   [x] Plan Functions
+-   [x] Make Relations
+-   [x] 10 Iterations for above two
+-   [x] Reconfirm and Normalise DBMS
 -   [ ] Fetch full DBMS paralelly
 -   [ ] dump dbms schema
 -   [ ] Make and check all routes iteratively parallely
@@ -48,7 +48,7 @@ An app to practice problems. Using codechef API
 11. composer is used to install slim/slim and slim/psr7
     11b. make index.php in public folder and write api routes
 12. Copy web server settings to nginx from slim site and change port for php-fpm in www.conf or something at /etc/php/7.2/fpm/pool.d
-13. install php-pgsql, activate in etc/php/7.2/php.ini and then connect with dbms
+13. install php-pgsql, activate in etc/php/7.2/[cli|fpm]/php.ini and then connect with dbms
     13b. Also installed php cs fixer extension and composer in directory.
 14. all nginx, php7.2-fpm, postgresql services should be running. nginx default server can point to your frontend or you can have routes for it if you want to host multiple apps. No need to start php server as things get routed to fmp server automatically which I have set to be running at 9000.
 15. Also I used postman and its desktop agent for backend requests.
