@@ -1,7 +1,5 @@
 <?php
 
-require_once 'error.php';
-require_once 'utility.php';
 require_once 'oauth.php';
 define('PRINT_DEBUG', false);
 
@@ -41,9 +39,9 @@ function curlRequest($url, $post = false, $headers = array(), $data = array(), $
     }
 }
 
-function codeChefGet($path, $data)
+function codeChefGet($dbconn, $path, $data)
 {
-    $authDetails = getAuthDetails();
+    $authDetails = getAuthDetails($dbconn);
     $headers[] = 'Authorization: Bearer ' . $authDetails['access_token'];
     $response = curlRequest($path, false, $headers, $data);
     $response = json_decode($response, true);
@@ -55,7 +53,7 @@ function codeChefGet($path, $data)
             sleep(5*60);
             logInfo("I AM AWAKE");
         } else {
-            routeError($errstr, 'codeChefGet', array($path,$data));
+            routeError($dbconn, $errstr, 'codeChefGet', array($path,$data));
         }
         return false;
     } else {

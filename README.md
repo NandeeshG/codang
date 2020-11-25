@@ -55,4 +55,4 @@ An app to practice problems. Using codechef API
 
 ## Added in this project
 
-16. requests from php made with curl libcurl3 libcurl3-dev php7.2-curl
+16. requests from php made with curl libcurl3 libcurl3-dev php7.2-curl OR libcurl4 packages and restart fpm and check in phpinfo() if curl section appears

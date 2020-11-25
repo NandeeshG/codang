@@ -1,31 +1,28 @@
 <?php
 
-require_once 'error.php';
-require_once 'utility.php';
 require_once 'dbms.php';
 
-define('CD', "codang_test");
+//returns false on some failed query. error logged
 
+//returns the result (use index [0] to access) or empty array (for insert) on success.
 //columns - code contest done
+
+//update returns empty array in every case
 
 //retrieve next problem not done yet
 // use sortby for consistency
-function getNextProblem()
+function codangTestSelect($dbconn, $pq=false)
 {
-    return connectAndExecuteQuery('select * from problem where done=0 order by problem limit 1', CD);
+    return withTrnscQuery($dbconn, "select * from problem where done=0 order by problem limit 1", $pq);
 }
 
-function markProblemDone($problemcode)
+function codangTestUpdate($dbconn, $problemcode, $pq=false)
 {
-    return connectAndExecuteQuery("update problem set done = 1 where code='$problemcode'", CD);
+    return withTrnscQuery($dbconn, "update problem set done = 1 where code='$problemcode'", $pq);
 }
 
 //add new set of problem and contest
-function addNewProblem($problemcode, $contestcode)
+function codangTestInsert($dbconn, $problemcode, $contestcode, $pq = false)
 {
-    return connectAndExecuteQuery("insert into problem (code,contest,done) values ('$problemcode','$contestcode',0)", CD);
+    return withTrnscQuery($dbconn, "insert into problem (code,contest,done) values ('$problemcode','$contestcode',0)", $pq);
 }
-
-//returns false on some failed query. error logged
-//returns the result (use index [0] to access) or empty array (for insert) on success.
-//update returns empty array in every case
