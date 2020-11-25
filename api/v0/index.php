@@ -15,25 +15,6 @@ $dbconn_test = handleConnect("codang_test", "open", false);
 //2. This file will use get auth from DB or call oauth if env is development or return error if environment is production.
 //3. It will use oauth and send request to api by curl file functions. That file shall return error on no auth or no api, whereas wait for rate limit
 
-
-//$list = array('c++','C++17','JAVA','kyle');
-//foreach ($list as $lang) {
-//    $dbconn = '';
-//    $trn = transaction("begin", $dbconn);
-//    logInfo("back in main", $dbconn);
-//    $qr = addLanguage($list[0], $dbconn);
-//    echo json_encode($qr);
-//    if ($trn===false or $qr===false) {
-//        transaction("rollback", $dbconn);
-//    } else {
-//        transaction("commit", $dbconn);
-//    }
-//}
-
-//$res = getCountry($dbconn, "name", "japan2", true);
-$res = addCountryByName($dbconn, "China", false);
-logInfo("Gotten - ", $res);
-
 //--------------------------------------------------------------------------------
 $dbconn = handleConnect($dbconn, "close", false);
 $dbconn_test = handleConnect($dbconn_test, "close", false);
