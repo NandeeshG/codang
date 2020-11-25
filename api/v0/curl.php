@@ -3,9 +3,9 @@
 require_once 'error.php';
 require_once 'utility.php';
 require_once 'oauth.php';
-require_once 'index.php';
+define('PRINT_DEBUG', false);
 
-function curlRequest($url, $post = false, $headers = array(), $data = array(), $debug=false)
+function curlRequest($url, $post = false, $headers = array(), $data = array(), $debug=PRINT_DEBUG)
 {
     //$params = '';
     //foreach ($data as $key=>$value) {
@@ -31,12 +31,13 @@ function curlRequest($url, $post = false, $headers = array(), $data = array(), $
         logInfo("CURL URL - ".curl_getinfo($ch)['url'].newline(), $response);
     }
 
-    if (curl_errno($ch)) {  //catch if curl error exists and show it
-        curl_close($ch);
-        logError('Curl error: ' . curl_error($ch), $response);
-    } else {
+    if (curl_errno($ch)===0) {
         curl_close($ch);
         return $response;
+    } else {
+        curl_close($ch);
+        logError('Curl error: ' . curl_error($ch), $response);
+        return false;
     }
 }
 
@@ -59,5 +60,18 @@ function codeChefGet($path, $data)
         return false;
     } else {
         return $response;
+    }
+}
+
+function errorFromApi($response)
+{
+    if ($response === false) {
+        logError("empty response!");
+        return true;
+    } elseif ($response['result']['data']['code'] === 9001) {
+        return false;
+    } else {
+        logError("Error in response", $response);
+        return true;
     }
 }

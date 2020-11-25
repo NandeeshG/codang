@@ -5,7 +5,7 @@ require_once 'utility.php';
 require_once 'dbms.php';
 require_once 'newAuthCode.php';
 require_once 'curl.php';
-require_once 'index.php';
+//require_once 'index.php';
 ob_start();
 
 // Do what the caller asks and update database or handle error and update database or die.
