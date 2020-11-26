@@ -35,7 +35,7 @@ function addInstitutionByName($dbconn, $institution, $pq=false)
             return getInstitution($dbconn, "name", $institution, $pq);
         }
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -72,7 +72,7 @@ function addCountryByName($dbconn, $country, $pq=false)
             return getCountry($dbconn, "name", $country, $pq);
         }
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -109,7 +109,7 @@ function addContestByCode($dbconn, $contest, $pq=false)
             return getContestByCode($dbconn, $contest, $pq);
         }
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -141,7 +141,7 @@ function addLanguageByName($dbconn, $language, $pq=false)
             return getLanguageByName($dbconn, $language, $pq);
         }
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -220,7 +220,7 @@ function addEndUserByName($dbconn, $username, $pq=false)
             }
         }
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -415,7 +415,7 @@ function addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestco
             return getProblemByCode($dbconn, $problemcode, $pq);
         }
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -572,7 +572,7 @@ function addTagByNamePublic($dbconn, $tag, $pq="false")
         //    }
         //} while (true);
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
@@ -618,13 +618,18 @@ function addCategoryWithTagName($dbconn, $tag, $pq)
     //check if tag is author from retreiving first tag problem and comparing its author
     if ($category === false) {
         $probdetails = $tagfetch['result']['data']['content'];
-        logInfo("Problemdetails for tag ".$tag, $probdetails);
+        //logInfo("Problemdetails for tag ".$tag, $probdetails);
         foreach ($probdetails as $key=>$value) {
             $author = trim($value['author']);
             $user = getEndUserByName($dbconn, $author, $pq);
-            if ($user !== false and count($user)!==0) {
+            if ($user === false or count($user)===0) {
                 $user = fetchEndUserByName($dbconn, $author, $pq);
             }
+
+            if (strcmp($author, $tag)!==0) {
+                break;
+            }
+
             if ($user !== false and count($user)!==0) {
                 $band = $user['result']['data']['content']['band'];
                 if (strcasecmp($band, "UnRated")!==0 and (int)$band[0] > 1) {
@@ -657,7 +662,7 @@ function addCategoryWithTagName($dbconn, $tag, $pq)
         }
         return getCategoryByName($dbconn, $category, $pq);
     } else {
-        logInfo("Already exists - ", $exists);
+        echo "Already Exists!"; //logInfo("Already exists - ", $exists);
         return $exists;
     }
 }
