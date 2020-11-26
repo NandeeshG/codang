@@ -45,31 +45,23 @@ function codeChefGet($dbconn, $path, $data)
     $headers[] = 'Authorization: Bearer ' . $authDetails['access_token'];
     $response = curlRequest($path, false, $headers, $data);
     $response = json_decode($response, true);
-    $errstr = extractError($response);
+    $errstr = extractError($response); //for auth and rate limit exceed errors
     if (strcmp($errstr, 'ok')!==0) {
         logError($errstr, $response);
         if (checkWaitError($errstr)) {
             logInfo("I AM WAITING");
             sleep(5*60);
             logInfo("I AM AWAKE");
+            //callback curr function
+            return call_user_func_array('codeChefGet', array($dbconn, $path, $data));
         } else {
-            routeError($dbconn, $errstr, 'codeChefGet', array($path,$data));
+            routeError($dbconn, $errstr, 'codeChefGet', array($dbconn, $path,$data));
+            return false;
         }
-        return false;
     } else {
+        // this response may have api's errors, handle them yourself
         return $response;
     }
 }
 
-function errorFromApi($response)
-{
-    if ($response === false) {
-        logError("empty response!");
-        return true;
-    } elseif ($response['result']['data']['code'] === 9001) {
-        return false;
-    } else {
-        logError("Error in response", $response);
-        return true;
-    }
-}
+

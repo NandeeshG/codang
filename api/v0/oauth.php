@@ -3,6 +3,8 @@
 require_once 'error.php';
 define('PQ', false);
 
+require_once 'curl.php'; //to allow callbacks
+
 // How to return to caller?? use call_user_func_array();
 
 function routeError($dbconn, $errstr, $callback=null, $paramarr=array())
@@ -90,7 +92,7 @@ function accessToken($dbconn, $callback=null, $paramarr=array())
 
     $str = extractError($response);
     if (strcmp($str, "ok")!==0) {
-        routeError($str, $callback, $paramarr);
+        routeError($dbconn, $str, $callback, $paramarr);
     }
 
     $result = $response['result']['data'];
