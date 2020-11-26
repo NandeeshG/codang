@@ -1,7 +1,6 @@
 <?php
 require_once 'error.php';
 
-define("PRINT_QUERY", false);
 // TrnsQuery - returns array of associated arrays
 // use double loop to use the return value
 // use json_encode(ret) to print

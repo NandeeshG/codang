@@ -1,7 +1,6 @@
 <?php
 
 require_once 'error.php';
-define('PQ', false);
 
 require_once 'curl.php'; //to allow callbacks
 

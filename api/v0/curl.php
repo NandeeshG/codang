@@ -1,7 +1,6 @@
 <?php
 
 require_once 'oauth.php';
-define('PRINT_DEBUG', false);
 
 function curlRequest($url, $post = false, $headers = array(), $data = array(), $debug=PRINT_DEBUG)
 {

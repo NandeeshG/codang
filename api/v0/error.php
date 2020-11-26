@@ -11,6 +11,9 @@ function logError($errstr, $resource=null)
     var_dump($resource);
     echo newline()."------XXXXXXXXX------".newline();
     echo newline();
+    if (EXIT_ON_ERROR === true) {
+        die();
+    }
 }
 
 function logInfo($infostr, $resource=null)

@@ -2,9 +2,45 @@
 
 require_once 'dbms.php';
 require_once 'fetch.php';
+require_once './interactWithTest.php';
+
+function addInstitutionByName($dbconn, $institution, $pq=false)
+{
+    $institution = trim($institution);
+    $exists = getInstitution($dbconn, "name", $institution, $pq);
+    if ($exists === false) {
+        //fetch from api and add to dbms
+        $data = fetchInstitutionByName($dbconn, $institution, $pq);
+        if ($data === false) {
+            logError("No data for this institution - ".$institution, $data);
+            return false;
+        } else {
+            // add to database
+            $data = $data['result']['data']['content'][0];
+
+            if (strcmp(trim($institution), trim($data['institutionName']))!==0) {
+                logError("Names $institution and {$data['institutionName']} don't match");
+                return false;
+            }
+
+            $name = pg_escape_literal(trim($data['institutionName']));
+            $qr = nonTrnscQuery($dbconn, "insert into institution (name) values ($name)", $pq);
+            if ($qr === false) {
+                logError("Cannot insert institution - ".$institution, $qr);
+                return false;
+            }
+            return getInstitution($dbconn, "name", $institution, $pq);
+        }
+    } else {
+        logInfo("Already exists - ", $exists);
+        return $exists;
+    }
+}
+
 
 function addCountryByName($dbconn, $country, $pq=false)
 {
+    $country = trim($country);
     //check if already exists?
     $exists = getCountry($dbconn, "name", $country, $pq);
     if ($exists === false) {
@@ -16,40 +52,18 @@ function addCountryByName($dbconn, $country, $pq=false)
         } else {
             //add to database
             $data = $data['result']['data']['content'][0];
-            $ctry = pg_escape_literal(trim($country));
+            if (strcmp(trim($country), trim($data['countryName']))!==0) {
+                logError("Names $country and {$data['countryName']} don't match");
+                return false;
+            }
+            $ctry = pg_escape_literal(trim($data['countryCode']));
             $name = pg_escape_literal(trim($data['countryName']));
             $qr = nonTrnscQuery($dbconn, "insert into country (code,name) values ($ctry,$name)", $pq);
             if ($qr === false) {
                 logError("Cannot insert country - ".$country, $qr);
                 return false;
             }
-            return "Added-".json_encode($data);
-        }
-    } else {
-        logInfo("Already exists - ", $exists);
-        return $exists;
-    }
-}
-
-function addInstitutionByName($dbconn, $institution, $pq=false)
-{
-    $exists = getInstitution($dbconn, "name", $institution, $pq);
-    if ($exists === false) {
-        //fetch from api and add to dbms
-        $data = fetchInstitutionByName($dbconn, $institution, $pq);
-        if ($data === false) {
-            logError("No data for this institution - ".$institution, $data);
-            return false;
-        } else {
-            // add to database
-            $data = $data['result']['data']['content'][0];
-            $name = pg_escape_literal(trim($data['institutionName']));
-            $qr = nonTrnscQuery($dbconn, "insert into institution (name) values ($name)", $pq);
-            if ($qr === false) {
-                logError("Cannot insert institution - ".$institution, $qr);
-                return false;
-            }
-            return "Added-".json_encode($data);
+            return getCountry($dbconn, "name", $country, $pq);
         }
     } else {
         logInfo("Already exists - ", $exists);
@@ -60,6 +74,7 @@ function addInstitutionByName($dbconn, $institution, $pq=false)
 // don't insert if isParent but return true
 function addContestByCode($dbconn, $contest, $pq=false)
 {
+    $contest = trim($contest);
     $exists = getContestByCode($dbconn, $contest, $pq);
     if ($exists === false) {
         //fetch from api and add to dbms
@@ -84,7 +99,7 @@ function addContestByCode($dbconn, $contest, $pq=false)
                 logError("Cannot insert contest - ".$contest, $qr);
                 return false;
             }
-            return "Added-".json_encode($data);
+            return getContestByCode($dbconn, $contest, $pq);
         }
     } else {
         logInfo("Already exists - ", $exists);
@@ -92,4 +107,488 @@ function addContestByCode($dbconn, $contest, $pq=false)
     }
 }
 
+function addLanguageByName($dbconn, $language, $pq=false)
+{
+    $language = trim($language);
+    $exists = getLanguageByName($dbconn, $language, $pq);
+    if ($exists === false) {
+        //fetch from api and add to dbms
+        $data = fetchLanguageByName($dbconn, $language, $pq);
+        if ($data === false) {
+            logError("No data for this language - ".$language, $data);
+            return false;
+        } else {
+            // add to database
+            $retr = trim($data['result']['data']['content'][0]['shortName']);
+            $lang = trim($language);
+            if (strcmpcase($retr, $lang)!==0) {
+                logError("Fetched name($retr) don't match with - ".$language, $data);
+                return false;
+            }
+            $retr = pg_escape_literal($retr);
+            $qr = nonTrnscQuery($dbconn, "insert into language (name) values ($retr)", $pq);
+            if ($qr === false) {
+                logError("Cannot insert language - ".$language, $qr);
+                return false;
+            }
+            return getLanguageByName($dbconn, $language, $pq);
+        }
+    } else {
+        logInfo("Already exists - ", $exists);
+        return $exists;
+    }
+}
+
+function addEndUserByName($dbconn, $username, $pq=false)
+{
+    $username = trim($username);
+    $exists = getEndUserByName($dbconn, $username, $pq);
+    if ($exists === false) {
+        //fetch from api and add to dbms
+        $data = fetchEndUserByName($dbconn, $username, $pq);
+        if ($data === false) {
+            logError("No data for this user - ".$username, $data);
+            return false;
+        } else {
+            $data = $data['result']['data']['content'];
+            $fullname = pg_escape_literal(trim($data['fullname']));
+            if (is_numeric($data['band'][0])) {
+                $band = (int)($data['band'][0]);
+            } else {
+                $band = 0;
+            }
+            $rating = $data['ratings']['allContest'];
+            $country = trim($data['country']['name']);
+            $institution = trim($data['organization']);
+
+            //add their country CODE
+            $res = addCountryByName($dbconn, $country, $pq);
+            if ($res === false or count($res) === 0) {
+                return false;
+            } else {
+                $country = $res[0]['code'];
+            }
+
+            //add their institution CODE
+            $res = addInstitutionByName($dbconn, $institution, $pq);
+            if ($res === false or count($res) === 0) {
+                return false;
+            } else {
+                $institution = $res[0]['code'];
+            }
+
+            // add to database
+            $username = pg_escape_literal($username);
+            $fullname = pg_escape_literal(trim($data['fullname']));
+            $band = pg_escape_literal($band);
+            $rating = pg_escape_literal($rating);
+            $country = pg_escape_literal($country);
+            $institution = pg_escape_literal($institution);
+
+            $qr = nonTrnscQuery($dbconn, "insert into enduser (username,fullname,band,rating,country,institution) values ($username,$fullname,$band,$rating,$country,$institution)", $pq);
+            if ($qr === false) {
+                logError("Cannot insert enduser - ".$username, $qr);
+                return false;
+            }
+            
+            $sub = addSubmissionsByUserName($dbconn, $username, $pq);
+            if ($sub === false) {
+                return false;
+            } else {
+                return getEndUserByName($dbconn, $username, $pq);
+            }
+        }
+    } else {
+        logInfo("Already exists - ", $exists);
+        return $exists;
+    }
+}
+
+//return only true or false
+function addSubmissionsByUserName($dbconn, $username, $pq=false)
+{
+    $username = trim($username);
+    // only query submissions after last query
+    do {
+        $afterid = getSubmissionByName($dbconn, $username, $pq, "oldest");
+        $data = fetchSubmissionByUserNameAfterId($dbconn, $username, $afterid, $pq);
+
+        if ($data === false) {
+            logError("No submissions for this user - ".$username, $data);
+            return false;
+        } elseif ($data['result']['data']['code']===9003) {
+            return true;
+        } else {
+            $data = $data['result']['data']['content'];
+
+            $id = pg_escape_literal($data['id']);
+            $sourcecode = pg_escape_literal("NOT AVAILABLE"); //from another api call again
+            $memory = pg_escape_literal($data['memory']);
+            $result = pg_escape_literal(trim($data['result']));
+            $score = pg_escape_literal($data['score']);
+            $time = pg_escape_literal($data['time']);
+            $date = pg_escape_literal(strtok(trim($data['date']), ' '));
+            $link = pg_escape_literal("");
+            $language = trim($data['language']);
+            $problemcode = trim($data['problemCode']);
+            $contestcode = trim($data['contestCode']);
+
+            //add the problem depending on env
+            if (MY_ENV === DEV) {
+                $temp = handleConnect("codang_test", "open", false);
+                if ($temp === false) {
+                    logError("Cannot open handle ", $data);
+                    continue;
+                }
+                $res = codangTestAddProblem($temp, $problemcode, $contestcode, $pq);
+                if ($res === false) {
+                    logError("Cannot add problem to codang ", $data);
+                    continue;
+                }
+                handleConnect($temp, "close", false);
+            } elseif (MY_ENV === PROD) {
+                $res = addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestcode, $pq);
+                if ($res === false or count($res) === 0) {
+                    continue; //because we wan't to add other submissions
+                }
+            }
+
+            //add the language
+            $res_lan = addLanguageByName($dbconn, $language, $pq);
+            if ($res_lan===false) {
+                continue;
+            }
+
+            $language = pg_escape_literal($res_lan[0]['code']);
+            $problemcode = pg_escape_literal($res[0]['code']);
+            $contestcode = pg_escape_literal($res[0]['contestcode']);
+
+            $qr = nonTrnscQuery($dbconn, "insert into submission (id,sourcecode,memory,result,date,time,score,link,username,languagecode,problemcode,contestcode) values ($id,$sourcecode,$memory,$result,$date,$time,$score,$link,$username,$language,$problemcode,$contestcode)", $pq);
+            if ($qr === false) {
+                logError("Cannot insert enduser - ".$username, $qr);
+                continue;
+            }
+        }
+    } while (true);
+    return true;
+}
+
+function addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestcode, $pq)
+{
+    $problemcode = trim($problemcode);
+    $contestcode = trim($contestcode);
+    $exists = getProblemByCode($dbconn, $problemcode, $pq);
+    if ($exists === false) {
+        //fetch from api and add to dbms
+        $data = fetchProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestcode, $pq);
+        if ($data === false) {
+            logError("No data for this problem - ".$problemcode, $data);
+            return false;
+        } else {
+            $data = $data['result']['data']['content'];
+
+            // non-hooks
+            $problemcode = $problemcode;
+            $name = pg_escape_literal(trim($data['problemName']));
+            $date = pg_escape_literal(trim($data['dateAdded']));
+            $maxtimelimit = $data['maxTimeLimit'];
+            $sourcesizelimit = $data['sourceSizeLimit'];
+            $body = pg_escape_literal(trim($data['body']));
+
+            // hooks
+            $contestcode_ = $contestcode;
+            $author = trim(($data['author']));
+            $langArr = $data['languagesSupported'];
+            $tagArr = $data['tags'];
+
+            //add their contest code
+            $res = addContestByCode($dbconn, $contestcode, $pq);
+            if ($res === false or count($res) === 0) {
+                logError("Cannot add contestcode - ".$contestcode);
+                return false;
+            }
+            
+            //add their author
+            $res = addEndUserByName($dbconn, $author, $pq);
+            if ($res === false or count($res) === 0) {
+                logError("Cannot add user - ".$author);
+                return false;
+            }
+
+            //add their languages and many-many-relation
+            foreach ($langArr as $language) {
+                $res = addLanguageByName($dbconn, $language, $pq);
+                if ($res === false or count($res) === 0) {
+                    logError("Cannot add language - ".$language);
+                    return false;
+                } else {
+                    $lc = $res[0]['code'];
+                    $res2 = addProblemLanguageByCodes($dbconn, $problemcode, $lc, $pq);
+                    if ($res2 === false or count($res2) === 0) {
+                        logError("Cannot add problemlanguagelink - ".$problemcode."-".$lc."-".$language);
+                        return false;
+                    }
+                }
+            }
+
+            //add their tags
+            foreach ($tagArr as $tag) {
+                $res = addTagByName($dbconn, $tag, $pq);
+                if ($res === false or count($res) === 0) {
+                    logError("Cannot add tag - ".$tag);
+                    return false;
+                } else {
+                    $tc = $res[0]['code'];
+                    $res2 = addProblemTagByCodes($dbconn, $problemcode, $tc, $pq);
+                    if ($res2 === false or count($res2) === 0) {
+                        logError("Cannot add problemtaglink - ".$problemcode."-".$tc."-".$tag);
+                        return false;
+                    }
+                }
+            }
+
+            // add to database
+            $problemcode = pg_escape_literal($problemcode);
+            $contestcode = pg_escape_literal($contestcode);
+            $author = pg_escape_literal($author);
+
+            $qr = nonTrnscQuery($dbconn, "insert into problem (code,name,date,maxtimelimit,sourcesizelimit,body,contestcode,author) values ($problemcode,$name,$date,$maxtimelimit,$sourcesizelimit,$body,$contestcode,$author)", $pq);
+            if ($qr === false) {
+                logError("Cannot insert problem - ".$problemcode, $qr);
+                return false;
+            }
+        }
+    } else {
+        logInfo("Already exists - ", $exists);
+        return $exists;
+    }
+}
+
+function addProblemLanguageByCodes($dbconn, $problemcode, $languagecode, $pq)
+{
+    $problemcode = pg_escape_literal(trim($problemcode));
+    $languagecode = pg_escape_literal(trim($languagecode));
+
+    $exists = getProblemLanguageByCodes($dbconn, $problemcode, $languagecode, $pq);
+    if ($exists === false) {
+        //add to dbms
+        $qr = nonTrnscQuery($dbconn, "insert into problemlanguage (problemcode,languagecode) values ($problemcode,$languagecode)", $pq);
+        if ($qr === false) {
+            logError("Cannot insert problem - language".$problemcode."-".$languagecode);
+            return false;
+        } else {
+            return $qr;
+        }
+    } else {
+        return $exists;
+    }
+}
+
+//for particular user as owner -> add tag name and owner referenced to username
+//add the given problem to problemtag category
+function addTagByNameToProblemsWithOwner($dbconn, $tag, $owner, $problemcodelist, $pq=false)
+{
+    $tag = trim($tag);
+    $owner = trim($owner);
+    $exists = getTagByNameByOwner($dbconn, $tag, $owner, $pq);
+    //if exists only add new problems if they too exist and don't have relation currently
+    //else add tag with tagname and owner, given the user exists (if not return false)
+    if ($exists === false) {
+        $res = getEndUserByName($dbconn, $owner, $pq);
+        if ($res === false) {
+            logError("User doesn't exist for tag - ".$tag, $pq);
+            return false;
+        }
+
+        //add tag name and owner to db
+        $tagname = pg_escape_literal($tag);
+        $ownername = pg_escape_literal($owner);
+        $res = nonTrnscQuery($dbconn, "insert into tag (name,owner) values ($tagname, $ownername)", $pq);
+        if ($res === false) {
+            logError("Cannot insert tag - ".$tagname, $res);
+            return false;
+        }
+    }
+    $res = getTagByNameByOwner($dbconn, $tag, $owner, $pq);
+    if ($res === false) {
+        logError("FATAL ERROR!! Get failed even after insert!! Cannot find tag - ".$tagname, $res);
+        return false;
+    }
+    $tagcode = $res[0]['code'];
+    foreach ($problemcodelist as $problemcode) {
+        //add their problem codes if exists
+        $res = getProblemByCode($dbconn, $problemcode, $pq);
+        if ($res === false or count($res) === 0) {
+            logInfo("Problem not in database yet".$problemcode, $res);
+            continue;
+        }
+
+        $problemcode = pg_escape_literal(trim($problemcode));
+        //add to problemtag
+        $res = nonTrnscQuery($dbconn, "insert into problemtag (problemcode,tagcode) values ($problemcode,$tagcode)", $pq);
+        if ($res == false) {
+            logError("Tag and Problem exist but cannot insert relationship - ".$tagcode."-".$problemcode, $pq);
+            return false;
+        }
+    }
+    return $res;
+}
+
+//for owner public only
+function addTagByNamePublic($dbconn, $tag, $pq="false")
+{
+    $tag = trim($tag);
+    $exists = getTagByNameByOwner($dbconn, $tag, "public", $pq);
+    if ($exists === false) {
+
+        //add tag name and owner to db
+        $tagname = pg_escape_literal($tag);
+        $ownername = pg_escape_literal("public");
+        $res = nonTrnscQuery($dbconn, "insert into tag (name,owner) values ($tagname, $ownername)", $pq);
+        if ($res === false) {
+            logError("Cannot insert tag - ".$tagname, $res);
+            return false;
+        }
+
+        //get its category (only if public) (also add)
+        $addtag = addCategoryWithTagName($dbconn, $tag, $pq); //returns the category row
+        if ($addtag === false) {
+            logError("Cannot add tag category", $addtag);
+            return false;
+        }
+
+        //add tagCategory
+        $tagret = nonTrnscQuery($dbconn, "select * from tag where name=$tagname and owner=$ownername", $pq);
+        $tagcode = pg_escape_literal(trim($tagret[0]['code']));
+        $catcode = pg_escape_literal(trim($addtag[0]['code']));
+        $addTagCat = nonTrnscQuery($dbconn, "insert into tagcategory (tagcode,category) values ($tagcode, $catcode)", $pq);
+        if ($addTagCat === false) {
+            logError("Cannot insert tag ".$tagcode."-".$catcode, $addTagCat);
+            return false;
+        }
+        
+        //fetch problems from api and add to dbms
+        $offset = 0;
+        do {
+            //fetch all its problems and add them
+            $data = fetchTagByNameWithOffset($dbconn, $tag, $offset, $pq); //gets first tag or false
+            //fetch tag automatically increases offset for its next call
+            if ($data === false) {
+                logError("No data for this problem - ".$problemcode, $data);
+                return false;
+            } elseif ($data['result']['data']['code'] === 9003) {
+                return $tagret;
+            } else {
+                $probAssoc = $data['result']['data']['content'];
+
+                foreach ($probAssoc as $problemcode=>$problemdetails) {
+                    //add their problem codes if exists
+                    // LIMITATION OF CCAPI - since it doesn't return contestcode for the problem, I cannot fetch
+                    // its details if problem doesn't exist. so use get. (but not a big problem, as that problem will
+                    // arrive now or later anyway)
+                    $res = getProblemByCode($dbconn, $problemcode, $pq);
+                    if ($res === false or count($res) === 0) {
+                        logInfo("Problem not in database yet".$problemcode, $res);
+                        continue;
+                    }
+
+                    $problemcode = pg_escape_literal(trim($problemcode));
+                    //add to problemtag
+                    $res = nonTrnscQuery($dbconn, "insert into problemtag (problemcode,tagcode) values ($problemcode,$tagcode)", $pq);
+                    if ($res == false) {
+                        logError("Tag and Problem exist but cannot insert relationship - ".$tagcode."-".$problemcode, $pq);
+                        return false;
+                    }
+                }
+            }
+        } while (true);
+    } else {
+        logInfo("Already exists - ", $exists);
+        return $exists;
+    }
+}
+
+function addCategoryWithTagName($dbconn, $tag, $pq)
+{
+    $tag = trim($tag);
+    //returns the category row
+    $category = false;
+
+    //check if tag is author from retreiving first tag problem and comparing its author
+    if ($category === false) {
+        $res = fetchTagByNameWithOffset($dbconn, $tag, 0, $pq);
+        if ($res === false) {
+            logError("Tag doesn't exists with codechef. ".$tag, $res);
+            return false;
+        } else {
+            $probAssoc = $res['result']['data']['content'];
+            foreach ($probAssoc as $probname=>$problemdetails) {
+                $author = trim($problemdetails['author']);
+                $user = getEndUserByName($dbconn, $author, $pq);
+                if ($user!==false) {
+                    $category = "Author";
+                } else {
+                    $user = fetchEndUserByName($dbconn, $author, $pq);
+                    if ($user!==false) {
+                        $category = "Author";
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    //check if tag is contest similarly
+    if ($category === false) {
+        //check local first to avoid api calls
+        $contest = getContestByCode($dbconn, $tag, $pq);
+        if ($contest!==false) {
+            $category = "Contest";
+        } else {
+            $contests = fetchContestByCode($dbconn, $tag, $pq);
+            if ($contest!==false) {
+                $category = "Contest";
+            }
+        }
+    }
+
+    //check words = easy medium hard cakewalk simple school challenge
+    if ($category === false) {
+        $listToCheck = ["easy","medium","hard","cakewalk","school"];
+        foreach ($listToCheck as $str) {
+            if (strpos($tag, $str)!==false) {
+                $category = "Difficulty";
+                break;
+            }
+        }
+    }
+
+    //categorize as concept in end
+    if ($category === false) {
+        $category = "Concept";
+    }
+
+    //dumb error checking
+    if ($category === false) {
+        logError("CATEGORY NOT FOUND FOR ".$tag, $category);
+        return false;
+    }
+    
+    //add category if not already exists
+    $exists = getCategoryByName($dbconn, $category, $pq);
+    if ($exists === false) {
+        // add to database
+
+        $category = pg_escape_literal(trim($category));
+        $qr = nonTrnscQuery($dbconn, "insert into category (name) values ($category)", $pq);
+        if ($qr === false) {
+            logError("Cannot insert category - ".$category, $qr);
+            return false;
+        }
+        return getCategoryByName($dbconn, $category, $pq);
+    } else {
+        logInfo("Already exists - ", $exists);
+        return $exists;
+    }
+}
 //------------------------------------------------------------------------------------------------
