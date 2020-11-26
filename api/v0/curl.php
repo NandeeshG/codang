@@ -10,7 +10,10 @@ function curlRequest($url, $post = false, $headers = array(), $data = array(), $
     //}
     //$params = trim($params, '&');
 
-    $params = http_build_query($data);
+    $params = http_build_query($data, "", "&", PHP_QUERY_RFC3986);
+
+    $params = str_replace("%27", "", $params); //change 'user' to user
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url.'?'.$params); //Url together with parameters
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //don't return instead of printing
@@ -46,7 +49,7 @@ function codeChefGet($dbconn, $path, $data)
     $response = json_decode($response, true);
     $errstr = extractError($response); //for auth and rate limit exceed errors
     if (strcmp($errstr, 'ok')!==0) {
-        logError($errstr, $response);
+        logInfo($errstr, $response);
         if (checkWaitError($errstr)) {
             logInfo("I AM WAITING");
             sleep(5*60);
@@ -62,5 +65,3 @@ function codeChefGet($dbconn, $path, $data)
         return $response;
     }
 }
-
-

@@ -2,14 +2,16 @@
 
 if (isCli()===0) {
     ob_start();
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
 }
 define('DEV', 123456);
 define('PROD', 654321);
 define('MY_ENV', DEV);
 define("PRINT_QUERY", false); //dbms.php
-define('PRINT_DEBUG', false); //curl.php
+define('PRINT_DEBUG', true); //curl.php
 define('PQ', false); //oauth.php
-definr('EXIT_ON_ERROR',true);
+define('EXIT_ON_ERROR', false);
 
 function isCli()
 {
@@ -41,17 +43,24 @@ function extractError($response)
     if (strcasecmp($response['status'], "ok")===0) {
         return "ok";
     }
-
+    $message = "ok";
     //below two for auth related and rate limited
     if ($response['result']['errors']['message']) {
-        return $response['result']['errors']['message'];
+        if ($response['result']['errors']['code']<9000) {
+            $message = $response['result']['errors']['message'];
+        }
     } elseif (is_array($response['result']['errors'])) {
         if ($response['result']['errors'][0]['message']) {
-            return $response['result']['errors'][0]['message'];
+            if ($response['result']['errors'][0]['code']<9000) {
+                $message = $response['result']['errors'][0]['message'];
+            }
         }
     }
-
-    return "ok";
+    if (strcmp($message, "you are not permitted to access this information")===0) {
+        return "ok";
+    } else {
+        return $message;
+    }
 }
 
 //handles only api errors

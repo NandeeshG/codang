@@ -47,7 +47,7 @@ function smallQuery($dbconn, $query, $pq=PRINT_QUERY)
         return false;
     }
     if ($pq === true) {
-        logInfo("result of query - ", $result);
+        logInfo("result of query - ".$query, $result);
     }
 
     return $result;
@@ -68,7 +68,7 @@ function nonTrnscQuery($dbconn, $query, $pq=PRINT_QUERY)
         return false;
     } else {
         $res_stat = pg_result_status($result);
-        $errstr = "SQL ERROR! (id-$res_stat) -> ".pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY).newline().pg_result_error_field($result, PGSQL_DIAG_MESSAGE_DETAIL).newline().pg_result_error_field($result, PGSQL_DIAG_MESSAGE_HINT).newline();
+        $errstr = "SQL ERROR! (id-$res_stat)(2 means ok) -> ".pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY).newline().pg_result_error_field($result, PGSQL_DIAG_MESSAGE_DETAIL).newline().pg_result_error_field($result, PGSQL_DIAG_MESSAGE_HINT).newline();
         if ($pq===true) {
             logInfo("result status is - ".$errstr, $result);
         }

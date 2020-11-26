@@ -10,20 +10,20 @@ function routeError($dbconn, $errstr, $callback=null, $paramarr=array())
 {
     //call correct function as per error
     if (strcmp($errstr, 'The authorization code has expired')===0) {
-        logError($errstr);
+        logInfo($errstr);
         getNewAuthCode($dbconn, $callback, $paramarr);
     } elseif (strcmp($errstr, "Authorization code doesn't exist or is invalid for the client")===0) {
-        logError($errstr);
+        logInfo($errstr);
         getNewAuthCode($dbconn, $callback, $paramarr);
     } elseif (strcmp($errstr, "Invalid refresh token")===0) {
-        logError($errstr);
+        logInfo($errstr);
         getNewAuthCode($dbconn, $callback, $paramarr);
     } elseif (strcmp($errstr, "Unauthorized for this resource scope")===0) {
-        logError("VERY VAGUE ERROR - MOSTLY CONTINUE?? ".$errstr);
+        logInfo("VERY VAGUE ERROR - MOSTLY CONTINUE?? ".$errstr);
         refreshToken($dbconn, $callback, $paramarr);
     } elseif (strcmp($errstr, "New code retreived")===0) {
-        logError($errstr);
-        accessToken($dbconn, $callback, $paramarr);
+        logInfo($errstr);
+        accessToken($dbconn, 'die', array("Access Token Generated"));
     } else {
         logError("NEW ERROR FOUND - ".$errstr);
         die();
@@ -33,12 +33,18 @@ function routeError($dbconn, $errstr, $callback=null, $paramarr=array())
 //do callback or goto localhost:8080
 function callBackHandler($callback=null, $paramarr=array())
 {
+    logInfo("At callback with callback - ".$callback, $paramarr);
     if ($callback===null) {
         header('Location: http://localhost:8080/');
     } else {
-        call_user_func_array($callback, $paramarr);
+        if (strcmp($callback, "die")===0) {
+            logInfo("CALLBACK IS KILLING ME");
+            die();
+        } else {
+            logInfo("CALLBACK IS TAKING ME TO ".$callback);
+            return call_user_func_array($callback, $paramarr);
+        }
     }
-    die();
 }
 
 function getAuthDetails($dbconn)
@@ -68,8 +74,8 @@ function refreshToken($dbconn, $callback=null, $paramarr=array())
         routeError($dbconn, $str, $callback, $paramarr);
     }
 
-    $result = $response['result']['data'];
-    $nowtime = time();
+    $result = ($response['result']['data']);
+    $nowtime = (time());
     $qr = nonTrnscQuery($dbconn, "update apiauth set gen_time='{$nowtime}', access_token='{$result['access_token']}', refresh_token='{$result['refresh_token']}', scope='{$result['scope']}'", PQ);
     //logInfo("Updated refreshToken", $result);
     if ($qr===false) {
@@ -94,8 +100,8 @@ function accessToken($dbconn, $callback=null, $paramarr=array())
         routeError($dbconn, $str, $callback, $paramarr);
     }
 
-    $result = $response['result']['data'];
-    $nowtime = time();
+    $result =  ($response['result']['data']);
+    $nowtime = (time());
     $qr = nonTrnscQuery($dbconn, "update apiauth set gen_time='{$nowtime}', access_token='{$result['access_token']}', refresh_token='{$result['refresh_token']}', scope='{$result['scope']}'", PQ);
     if ($qr===false) {
         logError("access token not updated", $qr);

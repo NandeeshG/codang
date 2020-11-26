@@ -13,6 +13,10 @@ function logError($errstr, $resource=null)
     echo newline();
     if (EXIT_ON_ERROR === true) {
         die();
+    } else {
+        echo "~~~~~~~~~~~~~~~~~~~~~~~wait for 30 seconds~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".newline();
+        sleep(30);
+        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".newline();
     }
 }
 

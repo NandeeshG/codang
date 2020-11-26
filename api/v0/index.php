@@ -19,6 +19,11 @@ $pq2 = false;
 while ($pc = codangTestNextProblem($dbconn_test, $pq)) {
     $problemcode = trim($pc[0]['code']);
     $contestcode = trim($pc[0]['contest']);
+
+    ////debug fetching problem
+    //$res = fetchProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestcode, $pq2);
+    //logInfo("OUTERMOST FETCH - ", $res);
+
     $bg = handleTrnsc($dbconn, "begin", false);
     if ($bg == false) {
         logError("begin not possible", $problemcode);
