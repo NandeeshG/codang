@@ -6,6 +6,17 @@
     <h1 v-else>
       {{ otherError }}
     </h1>
+    <v-img
+      v-if="error.statusCode === 404"
+      src="../static/404.jpg"
+      alt="404 error"
+    />
+    <v-img
+      v-else
+      src="../static/error.jpg"
+      :alt="error.statusCode + ' error'"
+    />
+
     <NuxtLink to="/"> Home page </NuxtLink>
   </v-app>
 </template>

@@ -1,91 +1,134 @@
 <template>
-  <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      fixed
-      app
-    >
-      <v-list>
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-        >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn icon @click.stop="clipped = !clipped">
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
-      <v-btn icon @click.stop="fixed = !fixed">
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
-      <v-toolbar-title v-text="title" />
+  <v-app>
+    <!--
+    <v-system-bar app status color="indigo lighten-1" height="20">
+      <strong> Status Bar </strong>
       <v-spacer />
-      <v-btn icon @click.stop="rightDrawer = !rightDrawer">
-        <v-icon>mdi-menu</v-icon>
+      <v-icon>mdi-account</v-icon>
+      <v-icon>mdi-cloud-check</v-icon>
+      <v-icon>mdi-wifi-strength-4</v-icon>
+    </v-system-bar>
+    -->
+
+    <v-app-bar app color="black">
+      <v-btn icon @click="drawer = !drawer">
+        <v-icon large>mdi-menu</v-icon>
       </v-btn>
+      <v-spacer></v-spacer>
+      <v-icon large color="primary">CODANG</v-icon>
+      <v-spacer></v-spacer>
+      <v-avatar size="46" color="grey">
+        <router-link to="/profile">
+          <v-img src="chef.jpg" contain height="50px" width="50px"> </v-img>
+        </router-link>
+      </v-avatar>
     </v-app-bar>
-    <v-main>
-      <v-container>
-        <nuxt />
-      </v-container>
-    </v-main>
-    <v-navigation-drawer v-model="rightDrawer" :right="right" temporary fixed>
-      <v-list>
-        <v-list-item @click.native="right = !right">
+
+    <v-navigation-drawer v-model="drawer" app temporary>
+      <v-list-item>
+        <v-list-item-content>
+          <v-avatar size="100">
+            <img src="../static/chef.jpg" />
+          </v-avatar>
+          <v-list-item-title class="title d-flex justify-center mt-2"
+            >Hi {{ vuexUsername }}!</v-list-item-title
+          >
           <v-list-item-action>
-            <v-icon light> mdi-repeat </v-icon>
+            <v-btn v-if="userIsLoggedIn" block link to="/logout">
+              Logout
+            </v-btn>
+            <v-btn v-else block link to="/login"> Login </v-btn>
           </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider />
+
+      <v-list dense nav>
+        <v-list-item link to="/profile">
+          <v-list-item-icon><v-icon>mdi-arrow-right</v-icon></v-list-item-icon>
+          <v-list-item-content>My Profile</v-list-item-content>
+        </v-list-item>
+        <v-list-item link to="/">
+          <v-list-item-icon><v-icon>mdi-arrow-right</v-icon></v-list-item-icon>
+          <v-list-item-content>Search Problems</v-list-item-content>
+        </v-list-item>
+        <v-list-item link to="/tag">
+          <v-list-item-icon><v-icon>mdi-arrow-right</v-icon></v-list-item-icon>
+          <v-list-item-content>Select Tags</v-list-item-content>
+        </v-list-item>
+        <v-list-item link to="/problem">
+          <v-list-item-icon><v-icon>mdi-arrow-right</v-icon></v-list-item-icon>
+          <v-list-item-content>Last Problem</v-list-item-content>
+        </v-list-item>
+        <v-list-item link to="/about">
+          <v-list-item-icon><v-icon>mdi-arrow-right</v-icon></v-list-item-icon>
+          <v-list-item-content>About Codang</v-list-item-content>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-footer :absolute="!fixed" app>
-      <span>&copy; {{ new Date().getFullYear() }}</span>
+
+    <v-main class="blue-grey">
+      <nuxt />
+    </v-main>
+
+    <v-footer class="black" app absolute inset>
+      <v-chip class="ma-n1" link to="/about"> Made by Nandeesh </v-chip>
+      <v-btn
+        v-for="(sm, id) in social"
+        :key="id"
+        icon
+        :href="sm.link"
+        target="_blank"
+        small
+        class="ml-2"
+      >
+        <v-icon>{{ sm.icon }}</v-icon>
+      </v-btn>
+
+      <v-spacer />
+
+      <v-chip class="ma-n1" link to="/"> CODANG </v-chip>
+
+      <v-spacer />
+      <v-chip class="ma-n1" href="https://www.codechef.com/" target="_blank">
+        CodeChef-API-{{ new Date().getFullYear() }}
+      </v-chip>
     </v-footer>
   </v-app>
 </template>
 
 <script>
+/* eslint-disable no-console */
+
 export default {
+  name: 'Default',
   data() {
     return {
-      clipped: false,
+      alert_welcome: false,
       drawer: false,
-      fixed: false,
-      items: [
+      social: [
+        { icon: 'mdi-github', link: 'https://www.github.com/NandeeshG/codang' },
         {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/',
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
+          icon: 'mdi-linkedin',
+          link: 'https://www.linkedin.com/in/nandeesh-gupta-05b43014a/',
         },
       ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Vuetify.js',
+      cols_val: 12,
+      sm_val: 6,
+      md_val: 4,
+      lg_val: 3,
     }
+  },
+  computed: {
+    vuexUsername() {
+      return this.$store.state.username
+    },
+    userIsLoggedIn() {
+      return this.$store.state.loggedIn
+    },
   },
 }
 </script>
+
+<style></style>
