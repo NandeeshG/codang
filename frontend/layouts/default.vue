@@ -24,7 +24,8 @@
       </v-avatar>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" app temporary>
+    <v-navigation-drawer v-model="drawer" app>
+      <!--<v-navigation-drawer v-model="drawer" app floating temporary>-->
       <v-list-item>
         <v-list-item-content>
           <v-avatar size="100">
@@ -34,10 +35,14 @@
             >Hi {{ vuexUsername }}!</v-list-item-title
           >
           <v-list-item-action>
-            <v-btn v-if="userIsLoggedIn" block link to="/logout">
+            <!--<v-btn v-if="userIsLoggedIn" block link to="/logout">
               Logout
             </v-btn>
-            <v-btn v-else block link to="/login"> Login </v-btn>
+            <v-btn v-else block link to="/login"> Login </v-btn>-->
+            <v-btn v-if="userIsLoggedIn" block @click="loginDialog = true">
+              Logout
+            </v-btn>
+            <v-btn v-else block @click="loginDialog = true"> Login </v-btn>
           </v-list-item-action>
         </v-list-item-content>
       </v-list-item>
@@ -69,6 +74,48 @@
     </v-navigation-drawer>
 
     <v-main class="blue-grey">
+      <v-dialog v-model="loginDialog" persistent max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span v-if="userIsLoggedIn === false" class="headline"
+              >LOGIN DETAILS</span
+            >
+            <span v-else class="headline">DO YOU REALLY WANT TO LOGOUT?</span>
+          </v-card-title>
+          <v-card-text v-if="userIsLoggedIn === false">
+            <v-text-field label="Username" required></v-text-field>
+            <!--<v-col cols="12">
+                  <v-text-field
+                    label="Password*"
+                    type="password"
+                    required
+                  ></v-text-field>
+                </v-col>-->
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="loginDialog = false">
+              Cancel
+            </v-btn>
+            <v-btn
+              v-if="userIsLoggedIn === false"
+              color="blue darken-1"
+              text
+              @click="loginDialog = false"
+            >
+              Login
+            </v-btn>
+            <v-btn
+              v-else
+              color="blue darken-1"
+              text
+              @click="loginDialog = false"
+            >
+              Logout
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <nuxt />
     </v-main>
 
@@ -105,7 +152,7 @@ export default {
   name: 'Default',
   data() {
     return {
-      alert_welcome: false,
+      loginDialog: false,
       drawer: false,
       social: [
         { icon: 'mdi-github', link: 'https://www.github.com/NandeeshG/codang' },
