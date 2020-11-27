@@ -119,7 +119,7 @@ function getNewAuthCode($dbconn, $callback=null, $paramarr=array())
         die();
     }
     $authDetails = getAuthDetails($dbconn);
-    $params = array('response_type'=>'code', 'client_id'=> $authDetails['client_id'], 'redirect_uri'=> $authDetails['redirect_uri'], 'state'=> 'xyz');
+    $params = array('response_type'=>'code', 'client_id'=> $authDetails['client_id'], 'redirect_uri'=> $authDetails['redirect_uri'], 'state'=> 'IekyWxLLp6oYcMLvrK7j');
     //logInfo("1Location: ". $authDetails['authorization_code_endpoint'], $params);
     header('Location: ' . $authDetails['authorization_code_endpoint'] . '?' . http_build_query($params));
     exit();

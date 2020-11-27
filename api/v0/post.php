@@ -21,10 +21,10 @@ function addInstitutionByName($dbconn, $institution, $pq=false)
             // add to database
             $data = $data['result']['data']['content'][0];
 
-            if (strcmp(trim($institution), trim($data['institutionName']))!==0) {
-                logError("Names $institution and {$data['institutionName']} don't match");
-                return false;
-            }
+            //if (strcmp(trim($institution), trim($data['institutionName']))!==0) {
+            //    logError("Names $institution and {$data['institutionName']} don't match");
+            //    return false;
+            //}
 
             $name = pg_escape_literal($dbconn, trim($data['institutionName']));
             $qr = nonTrnscQuery($dbconn, "insert into institution (name) values ($name)", $pq);
@@ -32,7 +32,7 @@ function addInstitutionByName($dbconn, $institution, $pq=false)
                 logError("Cannot insert institution - ".$institution, $qr);
                 return false;
             }
-            return getInstitution($dbconn, "name", $institution, $pq);
+            return getInstitution($dbconn, "name", trim($data['institutionName']), $pq);
         }
     } else {
         echo "Already Exists!"; //logInfo("Already exists - ", $exists);
