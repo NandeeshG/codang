@@ -35,7 +35,7 @@ while ($pc = codangTestNextProblem($dbconn_test, $pq)) {
             logError("rollback not possible", $problemcode);
         }
         logInfo("RolledBack - ".$problemcode, $qr);
-        die();
+        sleep(10);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
         if ($bg===false) {

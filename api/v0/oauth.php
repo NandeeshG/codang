@@ -20,10 +20,10 @@ function routeError($dbconn, $errstr, $callback=null, $paramarr=array())
         getNewAuthCode($dbconn, $callback, $paramarr);
     } elseif (strcmp($errstr, "Unauthorized for this resource scope")===0) {
         logInfo("VERY VAGUE ERROR - MOSTLY CONTINUE?? ".$errstr);
-        refreshToken($dbconn, $callback, $paramarr);
+        return refreshToken($dbconn, $callback, $paramarr);
     } elseif (strcmp($errstr, "New code retreived")===0) {
         logInfo($errstr);
-        accessToken($dbconn, 'die', array("Access Token Generated"));
+        return accessToken($dbconn, 'die', array("Access Token Generated"));
     } else {
         logError("NEW ERROR FOUND - ".$errstr);
         die();
@@ -71,7 +71,7 @@ function refreshToken($dbconn, $callback=null, $paramarr=array())
     logInfo("Retreived request and error ".$str, $response);
 
     if (strcmp($str, "ok")!==0) {
-        routeError($dbconn, $str, $callback, $paramarr);
+        return routeError($dbconn, $str, $callback, $paramarr);
     }
 
     $result = ($response['result']['data']);
@@ -82,7 +82,7 @@ function refreshToken($dbconn, $callback=null, $paramarr=array())
         logError("refreshToken token not updated", $qr);
         die();
     } else {
-        callBackHandler($callback, $paramarr);
+        return callBackHandler($callback, $paramarr);
     }
 }
 
@@ -97,7 +97,7 @@ function accessToken($dbconn, $callback=null, $paramarr=array())
 
     $str = extractError($response);
     if (strcmp($str, "ok")!==0) {
-        routeError($dbconn, $str, $callback, $paramarr);
+        return routeError($dbconn, $str, $callback, $paramarr);
     }
 
     $result =  ($response['result']['data']);
@@ -107,7 +107,7 @@ function accessToken($dbconn, $callback=null, $paramarr=array())
         logError("access token not updated", $qr);
         die();
     } else {
-        callBackHandler($callback, $paramarr);
+        return callBackHandler($callback, $paramarr);
     }
 }
 

@@ -57,8 +57,7 @@ function codeChefGet($dbconn, $path, $data)
             //callback curr function
             return call_user_func_array('codeChefGet', array($dbconn, $path, $data));
         } else {
-            routeError($dbconn, $errstr, 'codeChefGet', array($dbconn, $path,$data));
-            return false;
+            return routeError($dbconn, $errstr, 'codeChefGet', array($dbconn, $path,$data));
         }
     } else {
         // this response may have api's errors, handle them yourself
