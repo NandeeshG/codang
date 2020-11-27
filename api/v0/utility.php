@@ -65,15 +65,27 @@ function extractError($response)
 
 //handles only api errors
 //return true if error found else return code
-function errorFromApi($response)
+function errorFromApi($response, $lastcode_different=false)
 {
     if ($response === false) {
         logError("empty response!");
         return true;
     }
     $code = $response['result']['data']['code'];
+    if (is_integer($code)===false) {
+        $code = $response['result']['errors']['code'];
+    }
+    if (is_integer($code)===false) {
+        $code = $response['result']['errors'][0]['code'];
+    }
+    if (is_integer($code)===false) {
+        $code = $response['result'][0]['errors'][0]['code'];
+    }
+
     logInfo("code - ".$code, $response);
-    if ($code===9000 || $code===9002 || ($code>=9005 and $code===9007)) {
+    if ($lastcode_different===true and $code===9007) {
+        return $code;
+    } elseif ($code===9000 || $code===9002 || ($code>=9005 and $code===9007)) {
         return true;
     } else { //9001 or 9003 or 9004 handle on own
         return $code;

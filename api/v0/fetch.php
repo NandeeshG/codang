@@ -34,9 +34,11 @@ function fetchContestByCode($dbconn, $contest, $pq)
     $contest = trim($contest);
     $API_ENDPOINT = getAuthDetails($dbconn)['api_endpoint'];
     $response = codeChefGet($dbconn, $API_ENDPOINT."contests/".$contest, array());
-    $errcode = errorFromApi($response);
+    $errcode = errorFromApi($response, true);
     if ($errcode===9001) {
         return $response;
+    } elseif ($errcode===9007) {
+        return true;
     } else {
         return false;
     }
@@ -92,9 +94,11 @@ function fetchProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contest
     $contestcode = trim($contestcode);
     $API_ENDPOINT = getAuthDetails($dbconn)['api_endpoint'];
     $response = codeChefGet($dbconn, $API_ENDPOINT."contests/$contestcode/problems/$problemcode/", array());
-    $errcode = errorFromApi($response);
+    $errcode = errorFromApi($response, true);
     if ($errcode===9001) {
         return $response;
+    } elseif ($errcode===9007) {
+        return true; //some problems are not allowed to be viewed by us
     } else {
         return false;
     }

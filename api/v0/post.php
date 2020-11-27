@@ -27,6 +27,12 @@ function addInstitutionByName($dbconn, $institution, $pq=false)
             //}
 
             $name = pg_escape_literal($dbconn, trim($data['institutionName']));
+
+            //check again bcos codechef returns case insensitive result
+            $exists = getInstitution($dbconn, "name", trim($data['institutionName']), $pq);
+            if ($exists!==false) {
+                return $exists;
+            }
             $qr = nonTrnscQuery($dbconn, "insert into institution (name) values ($name)", $pq);
             if ($qr === false) {
                 logError("Cannot insert institution - ".$institution, $qr);
@@ -64,6 +70,13 @@ function addCountryByName($dbconn, $country, $pq=false)
             }
             $ctry = pg_escape_literal($dbconn, trim($data['countryCode']));
             $name = pg_escape_literal($dbconn, trim($data['countryName']));
+
+            //check again bcos codechef returns case insensitive result
+            $exists = getCountry($dbconn, "name", trim($data['countryName']), $pq);
+            if ($exists!==false) {
+                return $exists;
+            }
+
             $qr = nonTrnscQuery($dbconn, "insert into country (code,name) values ($ctry,$name)", $pq);
             if ($qr === false) {
                 logError("Cannot insert country - ".$country, $qr);
@@ -88,6 +101,9 @@ function addContestByCode($dbconn, $contest, $pq=false)
         if ($data === false) {
             logError("No data for this contest - ".$contest, $data);
             return false;
+        } elseif ($data === true) {
+            logError("Not allowed to view this contest - ".$contest, $data);
+            return true;
         } else {
             // add to database
             $data = $data['result']['data']['content'];
@@ -272,6 +288,7 @@ function addSubmissionsByUserName($dbconn, $username, $pq=false)
                     //    handleConnect($temp, "close", false);
                     //} elseif (MY_ENV === PROD) {
                     $res = addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestcode, $pq);
+                    //handle if $res === true
                     if ($res === false or count($res) === 0) {
                         continue; //because we wan't to add other submissions
                     }
@@ -315,6 +332,9 @@ function addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestco
         if ($data === false) {
             logError("No data for this problem - ".$problemcode, $data);
             return false;
+        } elseif ($data === true) {
+            logInfo("Not allowed to view this problem - ".$problemcode, $data);
+            return true;
         } else {
             $data = $data['result']['data']['content'];
 
@@ -334,7 +354,10 @@ function addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestco
 
             //add their contest code
             $res = addContestByCode($dbconn, $contestcode, $pq);
-            if ($res === false or count($res) === 0) {
+            if ($res === true) {
+                logInfo("NOT INSERTED PROBLEM - ".$problemcode." from ".$contestcode);
+                return true;
+            } elseif ($res === false or count($res) === 0) {
                 logError("Cannot add contestcode - ".$contestcode);
                 return false;
             }
@@ -385,6 +408,7 @@ function addProblemByProblemCodeAndContestCode($dbconn, $problemcode, $contestco
 
             //language temporary fix
             $res2 = addProblemLanguageByCodes($dbconn, $problemcode, 0, $pq);
+            //handle if $res is true
             if ($res2 === false or count($res2) === 0) {
                 logError("Cannot add temporary problemlanguagelink - ".$problemcode."-"."0", $res2);
                 return false;
