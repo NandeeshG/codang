@@ -4,57 +4,7 @@
   <v-app class="grey">
     <v-container>
       <!-- <v-container fluid> -->
-      <Heading>LOGIN</Heading>
-      <v-row justify="center">
-        <v-col cols="12">
-          <v-form ref="form" class="mt-13">
-            <v-row justify="center">
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="newStudent.name"
-                  :rules="[rules.required, rules.name]"
-                  dense
-                  outlined
-                  label="Name"
-                  class="ma-n2"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  :rules="[rules.required, rules.roll]"
-                  dense
-                  outlined
-                  label="Roll No."
-                  class="ma-n2"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  :rules="[rules.required, rules.class]"
-                  dense
-                  outlined
-                  label="Class"
-                  class="ma-n2"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  :rules="[rules.required, rules.section]"
-                  dense
-                  outlined
-                  label="Section"
-                  class="ma-n2"
-                />
-              </v-col>
-            </v-row>
-            <v-row justify="center">
-              <v-col cols="12" sm="8">
-                <v-btn block type="submit"> ADD STUDENT </v-btn>
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-col>
-      </v-row>
+      <Header> Use of this login page is not final rn. </Header>
     </v-container>
     <Snackbar :snackbar="snackbar" />
   </v-app>
