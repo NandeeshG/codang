@@ -38,7 +38,7 @@ export default {
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {
-    baseURL: 'codang.eastus.cloudapp.azure.com', // Used as fallback if no runtime config is provided
+    baseURL: 'http://codang.eastus.cloudapp.azure.com/',
   },
 
   // Vuetify module configuration (https://go.nuxtjs.dev/config-vuetify)
