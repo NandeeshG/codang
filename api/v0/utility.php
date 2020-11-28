@@ -8,7 +8,7 @@ if (isCli()===0) {
 define('DEV', 123456);
 define('PROD', 654321);
 define('MY_ENV', DEV);
-define("PRINT_QUERY", false); //dbms.php
+define('PRINT_QUERY', false); //dbms.php
 define('PRINT_DEBUG', true); //curl.php
 define('PQ', false); //oauth.php
 define('EXIT_ON_ERROR', false);

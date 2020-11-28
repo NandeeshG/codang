@@ -11,6 +11,12 @@ require_once 'post.php';
 require_once 'get.php';
 //require_once 'interactWithTest.php';  //for database crawling
 
+if (MY_ENV === PROD) {
+    $http_origin = 'codang.eastus.cloudapp.azure.com';
+} elseif (MY_ENV === DEV) {
+    $http_origin = 'localhost:3000';
+}
+
 $dbconn = handleConnect("codang", "open", false);
 //reroutes auth code to oauth
 if (isset($_GET['auth_rec_route'])) {
@@ -65,7 +71,7 @@ $app->get('/categories', function (Request $request, Response $response, $args) 
     $response->getBody()->write(json_encode($qr));
     return $response
           ->withHeader('Content-Type', 'application/json')
-          ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
           ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
           ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
           ->withStatus(200);
@@ -115,7 +121,7 @@ $app->get('/tags', function (Request $request, Response $response, $args) {
     $response->getBody()->write(json_encode($qr));
     return $response
           ->withHeader('Content-Type', 'application/json')
-          ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
           ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
           ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
           ->withStatus(200);
@@ -147,7 +153,7 @@ $app->get('/problems', function (Request $request, Response $response, $args) {
     $response->getBody()->write(json_encode($qr));
     return $response
           ->withHeader('Content-Type', 'application/json')
-          ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
           ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
           ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
           ->withStatus(200);
