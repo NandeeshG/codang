@@ -19,8 +19,6 @@
         <v-col cols="4">
           <v-overflow-btn
             v-model="selectedcategory"
-            auto-select-first
-            label="Category"
             :items="allcategories_names"
             @change="refreshTags"
           >
@@ -76,7 +74,7 @@ export default {
       alltags_names: [],
       allcategories_names: ['All'],
       selectedtags: [],
-      selectedcategory: '',
+      selectedcategory: 'All',
       allproblems: {},
       allproblems_details: [],
     }

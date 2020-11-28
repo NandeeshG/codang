@@ -1,23 +1,24 @@
 <template>
   <div>
-    <v-chip v-for="(tag, i) in alltags" :key="i">
+    <v-chip> Coming Soon </v-chip>
+    <!--<v-chip v-for="(tag, i) in alltags" :key="i">
       {{ tag.tagname }}
-    </v-chip>
+    </v-chip>-->
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    alltags: {
-      type: Array,
-      default() {
-        return {
-          tags: [],
-        }
-      },
-    },
-  },
+  // props: {
+  //   alltags: {
+  //     type: Array,
+  //     default() {
+  //       return {
+  //         tags: [],
+  //       }
+  //     },
+  //   },
+  // },
 }
 </script>
 
