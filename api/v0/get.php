@@ -143,7 +143,8 @@ function getTagsByCategory($dbconn, $category, $pq)
     if (strcasecmp($category, "all")===0) {
         $res = nonTrnscQuery($dbconn, "select code as tagcode, name as tagname from tag", $pq);
     } else {
-        $res = nonTrnscQuery($dbconn, "select tagcode,tagname from select_tag_by_category_func('{$category}')", $pq);
+        $category = pg_escape_literal($category);
+        $res = nonTrnscQuery($dbconn, "select tagcode,tagname from select_tag_by_category_func($category)", $pq);
     }
     if ($res === false or count($res)===0) {
         return false;
@@ -153,26 +154,57 @@ function getTagsByCategory($dbconn, $category, $pq)
 }
 
 //public only
-function getProblemsByTagList($dbconn, $taglist, $pq)
+function getProblemsByTagListOR($dbconn, $taglist, $pq)
 {
-    $ret = array();
     foreach ($taglist as $tag) {
         $tag = trim($tag);
         if (strcmp($tag, "")===0 or $tag==false) {
             return false;
         }
+        //$tag = pg_escape_literal($tag);
         $res = nonTrnscQuery($dbconn, "select code,name,date,contestcode,author from select_problem_by_tag_owner_func('{$tag}','public')", $pq);
         if ($res === false or count($res)===0) {
             return false;
         } else {
-            $ret[] = $res;
-            $ret = array_unique($ret);
+            foreach ($res as $prob) {
+                //$ret[] = json_encode($prob);
+                $ret[] = $prob;
+            }
+            //$ret = array_unique($ret);
         }
     }
     if ($ret===false or count($ret)===0) {
         return false;
     } else {
         return $ret;
+    }
+}
+
+//public only
+function getProblemsByTagListAND($dbconn, $taglist, $pq)
+{
+    if (count($taglist) === 0) {
+        return false;
+    }
+    $query = "select problem.* from problem where problem.code in (select problemtag.problemcode from problemtag join tag on tag.code=problemtag.tagcode where tag.name in (";
+    $append = "";
+    foreach ($taglist as $tag) {
+        $tag = pg_escape_literal($tag);
+        $append .= $tag;
+        $append .= ",";
+    }
+    $append = trim($append, ",");
+    $query .= $append;
+    $query .= ") group by problemtag.problemcode having count(distinct tag.name)=";
+    $query .= (int)(count($taglist));
+    $query .= ")";
+    //return $query;
+
+    $res = nonTrnscQuery($dbconn, $query, $pq);
+    if ($res === false or count($res)===0) {
+        return false;
+    } else {
+        return $res;
     }
 }
 

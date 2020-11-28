@@ -32,7 +32,7 @@ $app = AppFactory::create();
 $pq = false;
 
 $app->get('/', function (Request $request, Response $response, $args) {
-    $response->getBody()->write("Hello world!");
+    $response->getBody()->write("Welcome to CodangBE!");
     return $response;
 });
 
@@ -53,18 +53,21 @@ $app->get('/categories', function (Request $request, Response $response, $args) 
 
     $bg = handleTrnsc($dbconn, "begin", false);
     if ($bg===false) {
-        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     }
     $qr = getCategories($dbconn, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
         if ($bg===false) {
-            $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+            $empty = array();
+            $response->getBody()->write(json_encode($empty));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
     }
@@ -102,18 +105,21 @@ $app->get('/tags', function (Request $request, Response $response, $args) {
 
     $bg = handleTrnsc($dbconn, "begin", false);
     if ($bg===false) {
-        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     }
     $qr = getTagsByCategory($dbconn, $category, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
         if ($bg===false) {
-            $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+            $empty = array();
+            $response->getBody()->write(json_encode($empty));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
     }
@@ -128,25 +134,79 @@ $app->get('/tags', function (Request $request, Response $response, $args) {
 });
 
 // GET ALL PROBLEMS BY TAG LIST
-$app->get('/problems', function (Request $request, Response $response, $args) {
+$app->get('/problemsOR', function (Request $request, Response $response, $args) {
     $dbconn = $GLOBALS['dbconn'];
     $pq = $GLOBALS['pq'];
 
     $params = $request->getQueryParams();
+    $ret = array();
+    foreach ($params as $p) {
+        foreach ($p as $pp) {
+            $ret[] = $pp;
+        }
+    }
+
     $bg = handleTrnsc($dbconn, "begin", false);
     if ($bg===false) {
-        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     }
-    $qr = getProblemsByTagList($dbconn, $params['tags'], $pq);
+    $qr = getProblemsByTagListOR($dbconn, $ret, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
         return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
         if ($bg===false) {
-            $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+            $empty = array();
+            $response->getBody()->write(json_encode($empty));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+    }
+    foreach ($qr as $q) {
+        $q = json_decode($q);
+    }
+    $response->getBody()->write(json_encode($qr));  //or already returns json encoded
+    return $response
+          ->withHeader('Content-Type', 'application/json')
+          ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
+          ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+          ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+          ->withStatus(200);
+});
+
+// GET ALL PROBLEMS BY TAG LIST
+$app->get('/problemsAND', function (Request $request, Response $response, $args) {
+    $dbconn = $GLOBALS['dbconn'];
+    $pq = $GLOBALS['pq'];
+
+    $params = $request->getQueryParams();
+    $ret = array();
+    foreach ($params as $p) {
+        foreach ($p as $pp) {
+            $ret[] = $pp;
+        }
+    }
+    $bg = handleTrnsc($dbconn, "begin", false);
+    if ($bg===false) {
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    }
+    $qr = getProblemsByTagListAND($dbconn, $ret, $pq);
+    if ($qr === false) {
+        $bg = handleTrnsc($dbconn, "rollback", $pq);
+        $empty = array();
+        $response->getBody()->write(json_encode($empty));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    } else {
+        $bg = handleTrnsc($dbconn, "commit", $pq);
+        if ($bg===false) {
+            $empty = array();
+            $response->getBody()->write(json_encode($empty));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
     }
@@ -158,7 +218,6 @@ $app->get('/problems', function (Request $request, Response $response, $args) {
           ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
           ->withStatus(200);
 });
-
 
 $app->run();
 
