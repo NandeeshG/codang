@@ -122,7 +122,7 @@ export default {
           // this.allproblems = await this.$axios.get('/problems', {
           //  params: { tags: this.selectedtags },
           // })
-          //console.log(this.selectedtags)
+          // console.log(this.selectedtags)
           this.allproblems = await this.$axios.get(
             `/problemsOR?${this.selectedtags
               .map((n, index) => `tags[${index}]=${n}`)
@@ -149,7 +149,7 @@ export default {
           // this.allproblems = await this.$axios.get('/problems', {
           //  params: { tags: this.selectedtags },
           // })
-          //console.log(this.selectedtags)
+          // console.log(this.selectedtags)
           this.allproblems = await this.$axios.get(
             `/problemsAND?${this.selectedtags
               .map((n, index) => `tags[${index}]=${n}`)

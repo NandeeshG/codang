@@ -11,12 +11,12 @@ require_once 'post.php';
 require_once 'get.php';
 //require_once 'interactWithTest.php';  //for database crawling
 
-if (MY_ENV === PROD) {
-    $http_origin = 'http://codang.eastus.cloudapp.azure.com';
-} elseif (MY_ENV === DEV) {
-    $http_origin = 'http://localhost:3000';
-}
-$http_origin = '*';
+// if (MY_ENV === PROD) {
+//     $http_origin = 'http://codang.eastus.cloudapp.azure.com';
+// } elseif (MY_ENV === DEV) {
+//     $http_origin = 'http://localhost:3000';
+// }
+$http_origin = 'https://codang.netlify.app';
 
 $dbconn = handleConnect("codang", "open", false);
 //reroutes auth code to oauth
