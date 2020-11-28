@@ -12,9 +12,9 @@ require_once 'get.php';
 //require_once 'interactWithTest.php';  //for database crawling
 
 if (MY_ENV === PROD) {
-    $http_origin = 'codang.eastus.cloudapp.azure.com';
+    $http_origin = 'http://codang.eastus.cloudapp.azure.com';
 } elseif (MY_ENV === DEV) {
-    $http_origin = 'localhost:3000';
+    $http_origin = 'http://localhost:3000';
 }
 
 $dbconn = handleConnect("codang", "open", false);
