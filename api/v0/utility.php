@@ -13,6 +13,14 @@ define('PRINT_DEBUG', true); //curl.php
 define('PQ', false); //oauth.php
 define('EXIT_ON_ERROR', false);
 
+error_reporting(E_ALL); // Error/Exception engine, always use E_ALL
+ini_set('ignore_repeated_errors', true); // always use TRUE
+ini_set('display_errors', false); // Error/Exception display, use FALSE only in production environment or real server. Use TRUE in development environment
+ini_set('log_errors', true); // Error/Exception file logging engine.
+//error go to codang.error.log
+//ini_set('error_log', '/home/nandeesh/Documents/learn/codang/api/v0/php_error.log'); // Logging file path
+//error_log("Hello, errors!");
+
 function isCli()
 {
     if (strcmp(php_sapi_name(), 'cli')===0) {

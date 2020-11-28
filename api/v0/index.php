@@ -1,19 +1,167 @@
 <?php
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\MiddlewareInterface;
+use Slim\Factory\AppFactory;
+
+require __DIR__ . '/../../vendor/autoload.php';
+
 require_once 'post.php';
 require_once 'get.php';
-require_once 'interactWithTest.php';
+//require_once 'interactWithTest.php';  //for database crawling
 
 $dbconn = handleConnect("codang", "open", false);
 //reroutes auth code to oauth
 if (isset($_GET['auth_rec_route'])) {
     routeError($dbconn, $_GET['auth_rec_route']);
 }
-$dbconn_test = handleConnect("codang_test", "open", false);
-//1. This file declares all routes (might wanna split post and get routes among different files).
-//2. This file will use get auth from DB or call oauth if env is development or return error if environment is production.
-//3. It will use oauth and send request to api by curl file functions. That file shall return error on no auth or no api, whereas wait for rate limit
+//1. Routes that call sql functions declared here. sql functions in get.php
+//2. Connection to cc api severed now. (original plan was that user will pass their access token to backend and
+//    I will use it here to fetch data, but oauth2 failed in nuxtJS so consequently cannot fetch new user data)
 
+$app = AppFactory::create();
+//$app->setBasePath("/api/v0/index.php");
+
+$pq = false;
+
+$app->get('/', function (Request $request, Response $response, $args) {
+    $response->getBody()->write("Hello world!");
+    return $response;
+});
+
+// GET ALL TAGS - CATEGORY PARAMETER or ALL
+$app->get('/categories', function (Request $request, Response $response, $args) {
+    $dbconn = $GLOBALS['dbconn'];
+    $pq = $GLOBALS['pq'];
+
+    //foreach ($params as $k=>$v) {
+    //    echo newline($k).newline($v);
+    //}
+
+    //$params = $request->getQueryParams();
+    //$category = $params['category'];
+    //if ($category==false) {
+    //    $category = 'all';
+    //}
+
+    $bg = handleTrnsc($dbconn, "begin", false);
+    if ($bg===false) {
+        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    }
+    $qr = getCategories($dbconn, $pq);
+    if ($qr === false) {
+        $bg = handleTrnsc($dbconn, "rollback", $pq);
+        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    } else {
+        $bg = handleTrnsc($dbconn, "commit", $pq);
+        if ($bg===false) {
+            $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+    }
+    $response->getBody()->write(json_encode($qr));
+    return $response
+          ->withHeader('Content-Type', 'application/json')
+          ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+          ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+          ->withStatus(200);
+});
+    
+// GET ALL TAGS - CATEGORY PARAMETER or ALL
+$app->get('/tags', function (Request $request, Response $response, $args) {
+    $dbconn = $GLOBALS['dbconn'];
+    $pq = $GLOBALS['pq'];
+
+    //foreach ($params as $k=>$v) {
+    //    echo newline($k).newline($v);
+    //}
+
+    $params = $request->getQueryParams();
+    $category = $params['category'];
+    if ($category==false or strcasecmp($category, "all")===0) {
+        $category = 'all';
+    }
+    //$response->getBody()->write(json_encode($category));
+    //return $response
+    //      ->withHeader('Content-Type', 'application/json')
+    //      ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+    //      ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+    //      ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+    //      ->withStatus(200);
+   
+
+    $bg = handleTrnsc($dbconn, "begin", false);
+    if ($bg===false) {
+        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    }
+    $qr = getTagsByCategory($dbconn, $category, $pq);
+    if ($qr === false) {
+        $bg = handleTrnsc($dbconn, "rollback", $pq);
+        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    } else {
+        $bg = handleTrnsc($dbconn, "commit", $pq);
+        if ($bg===false) {
+            $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+    }
+    error_log(json_encode($qr));
+    $response->getBody()->write(json_encode($qr));
+    return $response
+          ->withHeader('Content-Type', 'application/json')
+          ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+          ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+          ->withStatus(200);
+});
+
+// GET ALL PROBLEMS BY TAG LIST
+$app->get('/problems', function (Request $request, Response $response, $args) {
+    $dbconn = $GLOBALS['dbconn'];
+    $pq = $GLOBALS['pq'];
+
+    $params = $request->getQueryParams();
+    $bg = handleTrnsc($dbconn, "begin", false);
+    if ($bg===false) {
+        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    }
+    $qr = getProblemsByTagList($dbconn, $params['tags'], $pq);
+    if ($qr === false) {
+        $bg = handleTrnsc($dbconn, "rollback", $pq);
+        $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    } else {
+        $bg = handleTrnsc($dbconn, "commit", $pq);
+        if ($bg===false) {
+            $response->getBody()->write(json_encode(array("error"=>"There was a problem fetching the details.")));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+    }
+    $response->getBody()->write(json_encode($qr));
+    return $response
+          ->withHeader('Content-Type', 'application/json')
+          ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+          ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+          ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+          ->withStatus(200);
+});
+
+
+$app->run();
+
+//---------------------------------------------------------------------------------------------------------------------
+//Script to do database crawling
+//Filling submission and language tables is disabled due to stack overflow errors.
+//Now that 6000+ problems exists in database, they can be switched on again.
+/*
+$dbconn_test = handleConnect("codang_test", "open", false);
 $pq = false;
 $pq2 = false;
 while ($pc = codangTestNextProblem($dbconn_test, $pq)) {
@@ -45,32 +193,7 @@ while ($pc = codangTestNextProblem($dbconn_test, $pq)) {
     }
     codangTestMarkProblem($dbconn_test, $problemcode, $pq);
 }
-
-//THIS SHOULD ALL CHANGE TO PROBLEM INSTEAD OF CONTEST
-// while ($cc = codangTestNextContest($dbconn_test, false)) {
-//     $code = trim($cc[0]['code']);
-//     $bg = handleTrnsc($dbconn, "begin", false);
-//     if ($bg===false) {
-//         die($code."-".$bg);
-//     }
-//     $qr = addContestByCode($dbconn, $code, false);
-//     if ($qr === false) {
-//         $bg = handleTrnsc($dbconn, "rollback", false);
-//         if ($bg===false) {
-//             die($code."-".$bg);
-//         }
-//         logInfo("RolledBack - ".$code, $qr);
-//         die();
-//     } else {
-//         $bg = handleTrnsc($dbconn, "commit", false);
-//         if ($bg===false) {
-//             die($code."-".$bg);
-//         }
-//         logInfo("Commited - ".$code, $qr);
-//     }
-//     codangTestMarkContest($dbconn_test, $code, false);
-// }
-
+$dbconn_test = handleConnect($dbconn_test, "close", false);
+*/
 //--------------------------------------------------------------------------------
 $dbconn = handleConnect($dbconn, "close", false);
-$dbconn_test = handleConnect($dbconn_test, "close", false);

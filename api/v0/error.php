@@ -8,7 +8,7 @@ function logError($errstr, $resource=null)
     debug_print_backtrace();
     echo newline()."ERROR ".date('H:i:s').": ".$errstr.newline();
     echo "RESOURCE: ".json_encode($resource).newline();
-    var_dump($resource);
+    //var_dump($resource);
     echo newline()."------XXXXXXXXX------".newline();
     echo newline();
     if (EXIT_ON_ERROR === true) {
@@ -26,7 +26,7 @@ function logInfo($infostr, $resource=null)
     debug_print_backtrace();
     echo newline()."INFO ".date('H:i:s').": ".$infostr.newline();
     echo "RESOURCE: ".json_encode($resource).newline();
-    var_dump($resource);
+    //var_dump($resource);
     echo newline()."------KKKKKKKKK------".newline();
     echo newline();
 }

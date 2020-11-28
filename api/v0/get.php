@@ -124,5 +124,57 @@ function getCategoryByName($dbconn, $category, $pq)
     }
 }
 
+function getCategories($dbconn, $pq)
+{
+    $res = nonTrnscQuery($dbconn, "select name from category", $pq);
+    if ($res === false or count($res)===0) {
+        return false;
+    } else {
+        return $res;
+    }
+}
+
+function getTagsByCategory($dbconn, $category, $pq)
+{
+    $category = trim($category);
+    if (strcmp($category, "")===0 or $category==false) {
+        return false;
+    }
+    if (strcasecmp($category, "all")===0) {
+        $res = nonTrnscQuery($dbconn, "select code as tagcode, name as tagname from tag", $pq);
+    } else {
+        $res = nonTrnscQuery($dbconn, "select tagcode,tagname from select_tag_by_category_func('{$category}')", $pq);
+    }
+    if ($res === false or count($res)===0) {
+        return false;
+    } else {
+        return $res;
+    }
+}
+
+//public only
+function getProblemsByTagList($dbconn, $taglist, $pq)
+{
+    $ret = array();
+    foreach ($taglist as $tag) {
+        $tag = trim($tag);
+        if (strcmp($tag, "")===0 or $tag==false) {
+            return false;
+        }
+        $res = nonTrnscQuery($dbconn, "select code,name,date,contestcode,author from select_problem_by_tag_owner_func('{$tag}','public')", $pq);
+        if ($res === false or count($res)===0) {
+            return false;
+        } else {
+            $ret[] = $res;
+            $ret = array_unique($ret);
+        }
+    }
+    if ($ret===false or count($ret)===0) {
+        return false;
+    } else {
+        return $ret;
+    }
+}
+
 
 //---------------------------------------------------------------------------------------

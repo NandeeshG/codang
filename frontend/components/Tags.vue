@@ -1,9 +1,24 @@
 <template>
-  <h1>TAGS - <slot> </slot></h1>
+  <div>
+    <v-chip v-for="(tag, i) in alltags" :key="i">
+      {{ tag.tagname }}
+    </v-chip>
+  </div>
 </template>
 
 <script>
-export default {}
+export default {
+  props: {
+    alltags: {
+      type: Array,
+      default() {
+        return {
+          tags: [],
+        }
+      },
+    },
+  },
+}
 </script>
 
 <style></style>

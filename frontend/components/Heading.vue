@@ -1,5 +1,5 @@
 <template>
-  <h1><slot> </slot></h1>
+  <h1 class="font-italic text-center text-md-h1 text-xs-h4"><slot> </slot></h1>
 </template>
 
 <script>

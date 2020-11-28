@@ -4,6 +4,7 @@
     timeout="2000"
     bottom
     left
+    large
     rounded="r-xl"
     :color="snackbar.color"
     transition="slide-x-transition"

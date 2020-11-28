@@ -119,7 +119,7 @@
       <nuxt />
     </v-main>
 
-    <v-footer class="black" app absolute inset>
+    <v-footer class="black" app fixed inset>
       <v-chip class="ma-n1" link to="/about"> Made by Nandeesh </v-chip>
       <v-btn
         v-for="(sm, id) in social"
