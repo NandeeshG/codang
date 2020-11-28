@@ -40,6 +40,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
 $app->get('/categories', function (Request $request, Response $response, $args) {
     $dbconn = $GLOBALS['dbconn'];
     $pq = $GLOBALS['pq'];
+    $retval = array('empty');
 
     //foreach ($params as $k=>$v) {
     //    echo newline($k).newline($v);
@@ -52,26 +53,18 @@ $app->get('/categories', function (Request $request, Response $response, $args) 
     //}
 
     $bg = handleTrnsc($dbconn, "begin", false);
-    if ($bg===false) {
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    if ($bg===true) {
+        $qr = getCategories($dbconn, $pq);
     }
-    $qr = getCategories($dbconn, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
-        if ($bg===false) {
-            $empty = array();
-            $response->getBody()->write(json_encode($empty));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        if ($bg===true) {
+            $retval = $qr;
         }
     }
-    $response->getBody()->write(json_encode($qr));
+    $response->getBody()->write(json_encode($retval));
     return $response
           ->withHeader('Content-Type', 'application/json')
           ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
@@ -85,46 +78,28 @@ $app->get('/tags', function (Request $request, Response $response, $args) {
     $dbconn = $GLOBALS['dbconn'];
     $pq = $GLOBALS['pq'];
 
-    //foreach ($params as $k=>$v) {
-    //    echo newline($k).newline($v);
-    //}
 
     $params = $request->getQueryParams();
     $category = $params['category'];
     if ($category==false or strcasecmp($category, "all")===0) {
         $category = 'all';
     }
-    //$response->getBody()->write(json_encode($category));
-    //return $response
-    //      ->withHeader('Content-Type', 'application/json')
-    //      ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
-    //      ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-    //      ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
-    //      ->withStatus(200);
-   
 
+    $retval = array('empty');
     $bg = handleTrnsc($dbconn, "begin", false);
-    if ($bg===false) {
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    if ($bg===true) {
+        $qr = getTagsByCategory($dbconn, $category, $pq);
     }
-    $qr = getTagsByCategory($dbconn, $category, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
-        if ($bg===false) {
-            $empty = array();
-            $response->getBody()->write(json_encode($empty));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        if ($bg===true) {
+            $retval = $qr;
         }
     }
-    error_log(json_encode($qr));
-    $response->getBody()->write(json_encode($qr));
+    $response->getBody()->write(json_encode($retval));
+
     return $response
           ->withHeader('Content-Type', 'application/json')
           ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
@@ -146,30 +121,26 @@ $app->get('/problemsOR', function (Request $request, Response $response, $args) 
         }
     }
 
+    $retval = array('empty');
     $bg = handleTrnsc($dbconn, "begin", false);
-    if ($bg===false) {
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    if ($bg===true) {
+        $qr = getProblemsByTagListOR($dbconn, $ret, $pq);
     }
-    $qr = getProblemsByTagListOR($dbconn, $ret, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
-        if ($bg===false) {
-            $empty = array();
-            $response->getBody()->write(json_encode($empty));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        if ($bg===true) {
+            $retval = $qr;
         }
     }
-    foreach ($qr as $q) {
-        $q = json_decode($q);
+    if (strcmp($retval[0], "empty")!==0) {
+        foreach ($retval as $q) {
+            $q = json_decode($q);
+        }
     }
-    $response->getBody()->write(json_encode($qr));  //or already returns json encoded
+
+    $response->getBody()->write(json_encode($retval));
     return $response
           ->withHeader('Content-Type', 'application/json')
           ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])
@@ -190,27 +161,22 @@ $app->get('/problemsAND', function (Request $request, Response $response, $args)
             $ret[] = $pp;
         }
     }
+    
+    $retval = array('empty');
     $bg = handleTrnsc($dbconn, "begin", false);
-    if ($bg===false) {
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+    if ($bg===true) {
+        $qr = getProblemsByTagListAND($dbconn, $ret, $pq);
     }
-    $qr = getProblemsByTagListAND($dbconn, $ret, $pq);
     if ($qr === false) {
         $bg = handleTrnsc($dbconn, "rollback", $pq);
-        $empty = array();
-        $response->getBody()->write(json_encode($empty));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
     } else {
         $bg = handleTrnsc($dbconn, "commit", $pq);
-        if ($bg===false) {
-            $empty = array();
-            $response->getBody()->write(json_encode($empty));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        if ($bg===true) {
+            $retval = $qr;
         }
     }
-    $response->getBody()->write(json_encode($qr));
+
+    $response->getBody()->write(json_encode($retval));
     return $response
           ->withHeader('Content-Type', 'application/json')
           ->withHeader('Access-Control-Allow-Origin', $GLOBALS['http_origin'])

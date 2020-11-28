@@ -27,10 +27,13 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="6">
-          <v-btn block @click="findProblems"> FIND PROBLEMS </v-btn>
+        <v-col cols="4">
+          <v-btn block @click="findProblems(0)"> FIND(using OR) </v-btn>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="4">
+          <v-btn block @click="findProblems(1)"> FIND(using AND) </v-btn>
+        </v-col>
+        <v-col cols="4">
           <v-btn block @click="clearProblems"> CLEAR RESULTS </v-btn>
         </v-col>
       </v-row>
@@ -91,6 +94,7 @@ export default {
   methods: {
     clearProblems() {
       this.allproblems_details = []
+      this.selectedtags = []
     },
     async refreshTags() {
       this.alldata.tags = await this.$axios.$get('/tags', {
@@ -98,32 +102,72 @@ export default {
       })
       this.selectedtags = []
       this.alltags_names = []
-      this.alldata.tags.forEach((element) => {
-        this.alltags_names.push(element.tagname)
-      })
+      if (this.alldata.tags[0] === 'empty') {
+        this.snackbar.display = true
+        this.snackbar.color = 'red'
+        this.snackbar.message = 'No data found!'
+      } else {
+        this.alldata.tags.forEach((element) => {
+          this.alltags_names.push(element.tagname)
+        })
+      }
     },
-    async findProblems() {
+    async findProblems(arg) {
       if (this.selectedtags.length === 0) {
         this.snackbar.display = true
         this.snackbar.color = 'red'
         this.snackbar.message = 'Select at least one tag.'
-      } else {
+      } else if (arg === 0) {
         try {
           // this.allproblems = await this.$axios.get('/problems', {
           //  params: { tags: this.selectedtags },
           // })
           console.log(this.selectedtags)
           this.allproblems = await this.$axios.get(
-            `/problems?${this.selectedtags
+            `/problemsOR?${this.selectedtags
               .map((n, index) => `tags[${index}]=${n}`)
               .join('&')}`
           )
           // console.log(this.allproblems.data[0])
           // console.log(this.allproblems.status)
-          this.allproblems_details = []
-          this.allproblems.data[0].forEach((el) => {
-            this.allproblems_details.push(el)
-          })
+
+          if (this.allproblems.data[0] === 'empty') {
+            this.snackbar.display = true
+            this.snackbar.color = 'red'
+            this.snackbar.message = 'No data found!'
+          } else {
+            this.allproblems_details = []
+            this.allproblems.data.forEach((el) => {
+              this.allproblems_details.push(el)
+            })
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      } else if (arg === 1) {
+        try {
+          // this.allproblems = await this.$axios.get('/problems', {
+          //  params: { tags: this.selectedtags },
+          // })
+          console.log(this.selectedtags)
+          this.allproblems = await this.$axios.get(
+            `/problemsAND?${this.selectedtags
+              .map((n, index) => `tags[${index}]=${n}`)
+              .join('&')}`
+          )
+          // console.log(this.allproblems.data[0])
+          // console.log(this.allproblems.status)
+
+          if (this.allproblems.data[0] === 'empty') {
+            this.snackbar.display = true
+            this.snackbar.color = 'red'
+            this.snackbar.message = 'No data found!'
+          } else {
+            this.allproblems_details = []
+            this.allproblems.data.forEach((el) => {
+              this.allproblems_details.push(el)
+            })
+          }
         } catch (error) {
           console.log(error)
         }

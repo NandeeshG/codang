@@ -8,6 +8,7 @@
     rounded="r-xl"
     :color="snackbar.color"
     transition="slide-x-transition"
+    content-class="text-h4"
   >
     {{ snackbar.message }}
   </v-snackbar>
