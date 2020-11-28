@@ -16,6 +16,7 @@ if (MY_ENV === PROD) {
 } elseif (MY_ENV === DEV) {
     $http_origin = 'http://localhost:3000';
 }
+$http_origin = '*';
 
 $dbconn = handleConnect("codang", "open", false);
 //reroutes auth code to oauth
