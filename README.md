@@ -1,4 +1,4 @@
-# Note - PLEASE VISIT http://35.196.42.192 to try the working app. 
+# Note - PLEASE VISIT https://www.shortto.com/codang to try the working app. 
 # CODANG
 
 An app to practice problems. Using codechef API
