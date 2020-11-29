@@ -21,14 +21,14 @@ An app to practice problems. Using codechef API
 -   [x] Make Relations
 -   [x] 10 Iterations for above two
 -   [x] Reconfirm and Normalise DBMS
--   [ ] Fetch full DBMS paralelly
--   [ ] dump dbms schema
--   [ ] Make and check all routes iteratively parallely
--   [ ] work on frontend iteratively parallely
--   [ ] frontend -> oauth, rules, simple to advanced iteration, extra features from api
--   [ ] dump server setup
--   [ ] deploy on azure
--   [ ] try deploy all azure, or deploy fe to netlify and add a backend not live try between 3pm-9pm alert in fe
+-   [x] Fetch full DBMS paralelly
+-   [x] dump dbms schema
+-   [x] Make and check all routes iteratively parallely
+-   [x] work on frontend iteratively parallely
+-   [x] frontend -> oauth, rules, simple to advanced iteration, extra features from api
+-   [x] dump server setup
+-   [x] deploy on azure
+-   [x] try deploy all azure, or deploy fe to netlify and add a backend not live try between 3pm-9pm alert in fe
 
 # STEPS
 
