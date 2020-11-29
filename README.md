@@ -1,4 +1,4 @@
-# Note - Since frontend hosted at <https://codang.netlify.app/> and backend hosted at <http://codangapi.eastus.cloudapp.azure.com/> there is http to https connection error. Trying to fix it asap.
+# Note - PLEASE VISIT http://35.196.42.192 to try the working app. 
 # CODANG
 
 An app to practice problems. Using codechef API
