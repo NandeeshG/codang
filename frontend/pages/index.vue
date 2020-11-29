@@ -2,7 +2,7 @@
   <v-app class="grey">
     <v-container>
       <!-- <v-container fluid> -->
-      <Heading>VISIT http://35.196.42.192/ TO SEE WORKING APP</Heading>
+      <Heading>VISIT https://www.shortto.com/codang TO SEE WORKING APP</Heading>
       <v-row justify="center">
         <v-col cols="8">
           <v-autocomplete
